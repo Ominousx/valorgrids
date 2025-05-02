@@ -1,0 +1,15 @@
+Coordinate,Kills,Deaths,Differential
+"3,8",4 kills,1 deaths,+3
+"5,8",2 kills,0 deaths,+2
+"2,8",2 kills,0 deaths,+2
+"6,3",2 kills,0 deaths,+2
+"5,1",1 kills,0 deaths,+1
+"2,6",3 kills,2 deaths,+1
+"4,8",1 kills,0 deaths,+1
+"4,7",1 kills,0 deaths,+1
+"3,7",1 kills,2 deaths,-1
+"5,7",0 kills,1 deaths,-1
+"3,5",0 kills,1 deaths,-1
+"4,1",0 kills,1 deaths,-1
+"3,4",0 kills,1 deaths,-1
+"5,2",0 kills,1 deaths,-1

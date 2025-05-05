@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.colors as mcolors
 import re
+import os  # <-- NEW: for dynamic title
 
 # --- Load Map ---
 map_path = 'maps/Icebox.png'
@@ -12,6 +13,12 @@ try:
 except FileNotFoundError:
     print(f"Map image not found at {map_path}")
     exit(1)
+
+# --- Extract map name dynamically ---
+map_name = os.path.basename(map_path).split('.')[0]
+
+# --- Ask user for a custom label (team names, player, side, etc.) ---
+match_label = input("Enter match label (e.g., 'Aspas Attack', 'DRX vs PRX'):\n").strip()
 
 # --- Read CSV ---
 df = pd.read_csv('demo_data.csv', dtype=str)
@@ -46,7 +53,7 @@ for _, row in df.iterrows():
     kills = int(kills_match.group(1))
     deaths = int(deaths_match.group(1))
 
-    # If you trust 'Differential' you could parse it, but we recalculate for safety
+    # We still recalculate diff just in case
     diff = kills - deaths
     engagements = kills + deaths
 
@@ -77,20 +84,20 @@ if np.isnan(max_engage):
 engage_norm = plt.Normalize(vmin=0, vmax=max_engage)
 
 # --- Ask user what to generate ---
-choice = input("What heatmap do you want to generate? (diff / engage / both): ").strip().lower()
+choice = input("What heatmap do you want to generate? (diff / engage):\n").strip().lower()
 
 if choice in ['diff', 'engage']:
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.imshow(img, extent=[0, 10, 10, 0])
 
     if choice == 'diff':
-        title = 'Rushia Def Haven Kill Differential Heatmap'
+        title_type = 'Kill Differential Heatmap'
         grid_data = diff_grid
         cmap = diff_cmap
         norm = diff_norm
         color_label = 'Kill Differential'
     else:
-        title = 'Aspas Atk Icebox Engagement Heatmap'
+        title_type = 'Engagement Heatmap'
         grid_data = engage_grid
         cmap = engage_cmap
         norm = engage_norm
@@ -125,14 +132,13 @@ if choice in ['diff', 'engage']:
     cbar.outline.set_visible(False)
     cbar.set_label(color_label, fontsize=12)
 
-    ax.set_title(title, fontsize=16, pad=20)
+    # ✅ Dynamic title here!
+    ax.set_title(f"{match_label} - {map_name} - {title_type}", fontsize=16, pad=20)
     ax.set_axis_off()
     output_file = f'demo_heatmap_{choice}.png'
     plt.savefig(output_file, bbox_inches='tight', dpi=300)
     print(f"Saved {output_file}")
     plt.show()
 
-elif choice == 'both':
-    print("Both option is not enabled (since you asked for toggle-only mode). Please run again and select 'diff' or 'engage'.")
 else:
     print("Invalid choice. Please run the script again and enter diff or engage.")

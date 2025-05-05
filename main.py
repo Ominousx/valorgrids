@@ -5,6 +5,9 @@ import matplotlib.colors as mcolors # using mcolors instead of patches
 import re
 import os  # <-- NEW: for dynamic title
 
+# ←— ADDED: use Matplotlib’s built-in dark style
+plt.style.use('dark_background')
+
 # --- Load Map ---
 map_path = 'maps/Icebox.png'
 try:
@@ -31,32 +34,17 @@ for _, row in df.iterrows():
     if ',' not in coord:
         print(f"Skipping invalid coord: '{coord}'")
         continue
-
     try:
         y, x = map(int, coord.split(','))
-    except Exception as e:
-        print(f"Failed to parse coordinate '{coord}': {e}")
+    except:
         continue
 
-    # Extract number from 'Kills' and 'Deaths' columns like '4 kills'
-    kills_text = str(row['Kills']).strip()
-    deaths_text = str(row['Deaths']).strip()
-
-    kills_match = re.match(r'(\d+)', kills_text)
-    deaths_match = re.match(r'(\d+)', deaths_text)
-
-    if not (kills_match and deaths_match):
-        print(f"Invalid kills/deaths: '{kills_text}', '{deaths_text}'")
-        continue
-
-    kills = int(kills_match.group(1))
-    deaths = int(deaths_match.group(1))
-
-    # We still recalculate diff just in case
+    # parse kills/deaths
+    kills = int(re.match(r'(\d+)', row['Kills']).group(1))
+    deaths = int(re.match(r'(\d+)', row['Deaths']).group(1))
     diff = kills - deaths
     engagements = kills + deaths
 
-    print(f"Grid ({y},{x}): K={kills}, D={deaths}, Diff={diff}, Engage={engagements}")
     diff_grid[y, x] = diff
     engage_grid[y, x] = engagements
 
@@ -70,7 +58,7 @@ diff_colors = [
     (1.0, '#006400')   # Dark green (+3)
 ]
 diff_cmap = mcolors.LinearSegmentedColormap.from_list('DiffRedGreen', diff_colors)
-diff_norm = plt.Normalize(vmin=-3, vmax=3)
+diff_norm = plt.Normalize(vmin=-3, vmax=+3)
 
 # Engagements: Light red to dark red
 engage_cmap = mcolors.LinearSegmentedColormap.from_list('EngagementRed', [
@@ -86,7 +74,13 @@ engage_norm = plt.Normalize(vmin=0, vmax=max_engage)
 choice = input("What heatmap do you want to generate? (diff / engage):\n").strip().lower()
 
 if choice in ['diff', 'engage']:
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(
+        figsize=(10, 10),
+        # ←— ADDED: set the figure facecolor to match dark style
+        facecolor='#121212',
+    )
+    # ←— ADDED: dark background for the axes
+    ax.set_facecolor('#121212')
 
     ax.imshow(img, extent=[0, 10, 10, 0], origin='upper', zorder=0)
 
@@ -130,15 +124,26 @@ if choice in ['diff', 'engage']:
     sm.set_array([])
     cbar = plt.colorbar(sm, ax=ax, shrink=0.75, pad=0.02)
     cbar.outline.set_visible(False)
-    cbar.set_label(color_label, fontsize=12)
+    # ←— ADDED: make ticks & label white
+    cbar.ax.yaxis.set_tick_params(color='white')
+    cbar.ax.tick_params(colors='white')
+    cbar.set_label(color_label, fontsize=12, color='white')
 
     # ✅ Dynamic title here!
-    ax.set_title(f"{match_label} - {map_name} - {title_type}", fontsize=16, pad=20)
+    ax.set_title(
+        f"{match_label} – {map_name} – {title_type}",
+        fontsize=16,
+        pad=20,
+        color='white'
+    )
+
     ax.set_axis_off()
     output_file = f'demo_heatmap_{choice}.png'
-    plt.savefig(output_file, bbox_inches='tight', dpi=300)
+    plt.savefig(output_file, bbox_inches='tight', dpi=300,
+                # ←— ADDED: ensure figure bg is saved
+                facecolor=fig.get_facecolor()
+    )
     print(f"Saved {output_file}")
     plt.show()
-
 else:
     print("Invalid choice. Please run the script again and enter diff or engage.")

@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import matplotlib.colors as mcolors
+import matplotlib.colors as mcolors # using mcolors instead of patches
 import re
 import os  # <-- NEW: for dynamic title
 
@@ -88,44 +87,45 @@ choice = input("What heatmap do you want to generate? (diff / engage):\n").strip
 
 if choice in ['diff', 'engage']:
     fig, ax = plt.subplots(figsize=(10, 10))
-    ax.imshow(img, extent=[0, 10, 10, 0])
 
+    ax.imshow(img, extent=[0, 10, 10, 0], origin='upper', zorder=0)
+
+    # select data + colormap
     if choice == 'diff':
         title_type = 'Kill Differential Heatmap'
         grid_data = diff_grid
         cmap = diff_cmap
         norm = diff_norm
         color_label = 'Kill Differential'
+        alpha = 0.8
     else:
         title_type = 'Engagement Heatmap'
         grid_data = engage_grid
         cmap = engage_cmap
         norm = engage_norm
         color_label = 'Engagements (Kills + Deaths)'
+        alpha = 0.8
 
+    # --- NEW: build a single 10×10×4 RGBA overlay ---
+    heat_rgba = np.zeros((10, 10, 4), dtype=float)
     for y in range(10):
         for x in range(10):
-            value = grid_data[y, x]
-            if not np.isnan(value):
-                color = cmap(norm(value))
-                rect = patches.Rectangle(
-                    (x, y), 1, 1,
-                    linewidth=0,
-                    edgecolor=None,
-                    facecolor=color,
-                    alpha=0.8
-                )
-                ax.add_patch(rect)
+            v = grid_data[y, x]
+            if not np.isnan(v):
+                r, g, b, _ = cmap(norm(v))    # get RGB from colormap
+                heat_rgba[y, x, :3] = (r, g, b)
+                heat_rgba[y, x,  3] = alpha   # fixed alpha
 
-    # Gridlines & labels
-    for y in range(10):
-        for x in range(10):
-            gridline = patches.Rectangle((x, y), 1, 1, linewidth=0.5, edgecolor='gray', facecolor='none')
-            ax.add_patch(gridline)
-    for i in range(10):
-        for j in range(10):
-            ax.text(j + 0.5, i + 0.5, f'{i},{j}', ha='center', va='center', color='white', fontsize=8, alpha=0.8)
+    # display the overlay
+    ax.imshow(
+        heat_rgba,
+        extent=[0, 10, 10, 0],
+        origin='upper',
+        interpolation='nearest',
+        zorder=1
+    )
 
+    # colorbar
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])
     cbar = plt.colorbar(sm, ax=ax, shrink=0.75, pad=0.02)

@@ -68,7 +68,7 @@ The output PNG file will be saved in your working directory as:
 
 | Kill Differential                            | Engagements                              |
 |---------------------------------------------|------------------------------------------|
-| ![Kill Diff](demo_heatmap_diff.png)         | ![Engage](demo_heatmap_engage.png)        |
+| ![Kill Diff](demo_heatmap_Aspas_Attack_diff.png)         | ![Engage](demo_heatmap_Aspas_Attack_engage.png)        |
 
 ---
 

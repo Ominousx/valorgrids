@@ -92,7 +92,7 @@ Built by [@Ominousx](https://github.com/Ominousx) 🎮
 
 For any feedback, feel free to:
 - 🐛 Open an issue here on GitHub,
-- 💬 Connect with me on [Twitter/X @Ominousx](https://twitter.com/Ominousx)
+- 💬 Connect with me on [Twitter/X @Ominousx](https://twitter.com/_SushantJha)
 
 ---
 
